@@ -1,10 +1,12 @@
+
 import queryString from "query-string";
 import AuthLayout from "../layouts/AuthLayout.jsx";
 import { useLocation } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { toast } from 'react-toastify';
 import { useHistory } from "react-router-dom";
-import useAuth from "../hooks/useAuth.jsx";
+import { useDispatch } from 'react-redux';
+import { login } from '../userSlice.js';
 
 import axios from "../utils/axios.js";
 
@@ -21,7 +23,7 @@ export default function Login() {
     mode: "onChange",
   });
 
-  const { login } = useAuth();
+  const dispatch = useDispatch();
 
   const history = useHistory();
 
@@ -31,7 +33,7 @@ export default function Login() {
       .post("/login", data)
       .then(resp => {
 
-        login(resp.data.token);
+        dispatch(login(resp.data.token));
 
         toast.success("Giriş başarılı");
 

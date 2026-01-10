@@ -1,19 +1,24 @@
 import { useState, useEffect } from "react";
+import { useDispatch, useSelector } from 'react-redux';
+import { loadTwits, addTwit, selectTwits } from '../twitsSlice.js';
+import { selectUser } from '../userSlice.js';
 
 import PageLayout from "../layouts/PageLayout.jsx";
 import Timeline from "../components/Timeline.jsx";
 import PostEditor from "../components/PostEditor.jsx";
-import useAuth from "../hooks/useAuth.jsx";
 
 import axios from "../utils/axios.js";
 
 export default function Home() {
 
-  const [posts, setPosts] = useState(undefined);
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const dispatch = useDispatch();
 
-  const { isLoggedIn } = useAuth();
+  const posts = useSelector(selectTwits);
+  const user = useSelector(selectUser);
+
+  const isLoggedIn = !!user;
 
   useEffect(() => {
 
@@ -22,7 +27,7 @@ export default function Home() {
     axios.get("/twits")
       .then(response => {
 
-        setPosts(response.data.twits);
+        dispatch(loadTwits(response.data.twits));
 
         setIsSuccess(true);
       })
@@ -40,8 +45,13 @@ export default function Home() {
 
   }, []);
 
+  const addPost = (post) => {
+
+    dispatch(addTwit(post));
+  }
+
   return <PageLayout className="">
-    {isLoggedIn && <PostEditor />}
+    {isLoggedIn && <PostEditor addPost={addPost} />}
     <Timeline posts={posts} isLoading={isLoading} isSuccess={isSuccess} />
   </PageLayout>;
 }
