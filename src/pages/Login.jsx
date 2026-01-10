@@ -1,7 +1,18 @@
-import AuthLayout from "./layouts/AuthLayout";
+import queryString from "query-string";
+import AuthLayout from "../layouts/AuthLayout.jsx";
+import { useLocation } from "react-router-dom";
 import { useForm } from "react-hook-form";
+import { toast } from 'react-toastify';
+import { useHistory } from "react-router-dom";
+import useAuth from "../hooks/useAuth.jsx";
 
-export default function Signup() {
+import axios from "../utils/axios.js";
+
+export default function Login() {
+  const { search } = useLocation();
+  const values = queryString.parse(search);
+  console.log(values.expiresIn, "***");
+
   const {
     register,
     handleSubmit,
@@ -10,8 +21,29 @@ export default function Signup() {
     mode: "onChange",
   });
 
-  function handleSignup(data) {
-    console.log(data, "---");
+  const { login } = useAuth();
+
+  const history = useHistory();
+
+  function handleLogin(data) {
+
+    axios
+      .post("/login", data)
+      .then(resp => {
+
+        login(resp.data.token);
+
+        toast.success("Giriş başarılı");
+
+        setTimeout(() => {
+          history.push("/");
+        }, 2000);
+      })
+      .catch(error => {
+        console.log(error);
+
+        toast.error("Giriş başarısız");
+      });
   }
 
   return (
@@ -19,21 +51,7 @@ export default function Signup() {
       <h1 className="text-3xl text-center font-semibold tracking-tighter text-lime-700">
         Hoş Geldin!
       </h1>
-      <form onSubmit={handleSubmit(handleSignup)}>
-        <div className="pt-4">
-          <div className="flex justify-between gap-2 items-baseline pb-1">
-            <label htmlFor="nickname ">İsim Soyisim</label>
-            <span className="text-sm font-medium text-red-600">
-              {errors.name && errors.name.message.toString()}
-            </span>
-          </div>
-          <input
-            type="text"
-            className="w-full h-10 px-2 border rounded-md border-gray-300"
-            {...register("name", { required: "Bu alan zorunlu" })}
-          />
-        </div>
-
+      <form onSubmit={handleSubmit(handleLogin)}>
         <div className="pt-4">
           <div className="flex justify-between gap-2 items-baseline pb-1">
             <label htmlFor="nickname ">Kullanıcı adı</label>
@@ -45,26 +63,6 @@ export default function Signup() {
             type="text"
             className="w-full h-10 px-2 border rounded-md border-gray-300"
             {...register("nickname", { required: "Bu alan zorunlu" })}
-          />
-        </div>
-
-        <div className="pt-4">
-          <div className="flex justify-between gap-2 items-baseline pb-1">
-            <label htmlFor="nickname">Email</label>
-            <span className="text-sm font-medium text-red-600">
-              {errors.email && errors.email.message.toString()}
-            </span>
-          </div>
-          <input
-            type="email"
-            className="w-full h-10 px-2 border rounded-md border-gray-300"
-            {...register("email", {
-              required: "Bu alan zorunlu",
-              pattern: {
-                value: /\S+@\S+\.\S+/,
-                message: "Geçerli bir email adresi girin",
-              },
-            })}
           />
         </div>
 

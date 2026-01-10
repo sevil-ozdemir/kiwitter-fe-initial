@@ -1,5 +1,5 @@
 import queryString from "query-string";
-import AuthLayout from "./AuthLayout";
+import AuthLayout from "./layouts/AuthLayout";
 import { useLocation } from "react-router-dom";
 import { useForm } from "react-hook-form";
 

@@ -1,9 +1,13 @@
-import "./App.css";
 import { Switch, Route } from "react-router-dom";
-import PageLayout from "./PageLayout";
-import Login from "./Login";
-import Signup from "./Signup";
+import { ToastContainer } from 'react-toastify';
+
+import PageLayout from "./layouts/PageLayout.jsx";
+import Login from "./pages/Login.jsx";
+import Signup from "./pages/Signup.jsx";
+import Home from "./pages/Home.jsx";
+
 import './utils/devserver.js';
+import "./App.css";
 
 function App() {
   return (
@@ -18,7 +22,7 @@ function App() {
 
         <Route path="/" exact>
           {/* /?variant=most_liked */}
-          <PageLayout>Home</PageLayout>
+          <Home />
         </Route>
         <Route path="/profile/:nick">
           <PageLayout>Profile page</PageLayout>
@@ -27,6 +31,7 @@ function App() {
           <PageLayout>Twit detail</PageLayout>
         </Route>
       </Switch>
+      <ToastContainer autoClose={2000} />
     </div>
   );
 }
