@@ -1,7 +1,14 @@
-import AuthLayout from "./layouts/AuthLayout";
+import AuthLayout from "../layouts/AuthLayout.jsx";
 import { useForm } from "react-hook-form";
+import axios from "../utils/axios.js";
+
+import { toast } from 'react-toastify';
+import { useHistory } from "react-router-dom";
 
 export default function Signup() {
+
+  const history = useHistory();
+  
   const {
     register,
     handleSubmit,
@@ -11,7 +18,24 @@ export default function Signup() {
   });
 
   function handleSignup(data) {
-    console.log(data, "---");
+
+    axios
+      .post("/signup", data)
+      .then(response => {
+        console.log(response.data);
+
+        toast.success("Kayıt başarılı. Giriş yapabilirsiniz");
+
+        setTimeout(() => {
+
+          history.push("/login");
+        }, 2000)
+      })
+      .catch(error => {
+        console.log(error);
+
+        toast.error("Kayıt başarısız");
+      });
   }
 
   return (
@@ -84,9 +108,9 @@ export default function Signup() {
         <div className="pt-4">
           <button
             type="submit"
-            className="h-12 text-center block w-full rounded-lg bg-lime-700 text-white font-bold "
+            className="h-12 text-center block w-full rounded-lg bg-lime-700 text-white font-bold uppercase"
           >
-            GİRİŞ
+            Kayıt Ol
           </button>
         </div>
       </form>
