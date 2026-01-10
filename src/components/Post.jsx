@@ -1,5 +1,10 @@
+import dayjs from 'dayjs'
+import relativeTime from 'dayjs/plugin/relativeTime'
+dayjs.extend(relativeTime)
 
 export default function Post({ post }) {
+
+  const date = dayjs(post.createDate).fromNow();
 
   return <div className="flex flex-row container mx-auto bg-white w-[40vw] rounded-xl shadow-xl p-4 gap-6">
     <div className="flex flex-col justify-start w-24">
@@ -13,7 +18,11 @@ export default function Post({ post }) {
       <div className="text-gray-700">
         {post.content}
       </div>
-      <div>
+      <div className="text-gray-400 text-sm">{date}</div>
+      <div className="flex flex-row gap-2">
+        <i className="bi bi-suit-heart cursor-pointer hover:text-primary text-gray-400"></i> <span className="text-gray-400">{post.likes}</span> &nbsp;
+        <i className="bi bi-arrow-repeat cursor-pointer hover:text-primary text-gray-400"></i> <span className="text-gray-400">{post.retweets}</span> &nbsp;
+        <i className="bi bi-chat cursor-pointer hover:text-primary text-gray-400"></i> <span className="text-gray-400">{post.replies}</span> &nbsp;
       </div>
     </div>
   </div>

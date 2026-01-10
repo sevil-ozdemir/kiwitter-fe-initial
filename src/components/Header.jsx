@@ -1,15 +1,22 @@
 import { Link } from "react-router-dom";
-import useAuth from "../hooks/useAuth.jsx";
+import { useDispatch, useSelector } from 'react-redux';
+import { selectUser, logout } from '../userSlice.js';
 
 export default function Header() {
 
-  const { isLoggedIn, logout } = useAuth();
+  const dispatch = useDispatch();
+  const user = useSelector(selectUser);
+  const isLoggedIn = !!user;
 
   let links;
 
+  const handleLogout = () => {
+    dispatch(logout());
+  }
+
   if (isLoggedIn) {
     links = <>
-      <a href="#" onClick={logout}>Çıkış Yap</a>
+      <a href="#" onClick={handleLogout}>Çıkış Yap</a>
     </>;
   } else {
     links = <>
