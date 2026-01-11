@@ -34,7 +34,16 @@ export default function PostEditor({ addPost }) {
       <textarea className="w-full h-32 border-solid border-[1px] rounded-md p-2" placeholder="Düşüncelerini yaz" value={text} onChange={handleChange} />
       <div className="flex flex-row justify-between items-center">
         <span className="text-sm text-gray-400">{MAX_LENGTH - text.length} karakter kaldı</span>
-        <button type="submit" className={`${disabled ? "bg-gray-400" : "bg-primary"} text-white px-2 py-1 rounded-md`}>Gönder</button>
+        
+        
+        <button
+  type="submit"
+  disabled={disabled}
+  className={`px-2 py-1 rounded-md text-white ${disabled ? "bg-gray-400 cursor-not-allowed" : "bg-primary"}`}
+>
+  Gönder
+</button>
+
       </div>
     </form>
   </div>
