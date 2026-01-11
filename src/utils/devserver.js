@@ -69,18 +69,18 @@ createServer({
   routes() {
     this.urlPrefix = "https://uppro-0825.workintech.com.tr/";
 
-    // 🔑 Login endpoint dinamik hale getirildi
+    //  Login endpoint dinamik hale getirildi
     this.post("/login", (schema, request) => {
       const { nickname } = JSON.parse(request.requestBody);
 
       const payload = {
         sub: "1000",
-        name: "Sevil Ozdemir", // Burayı istediğin isimle değiştirebilirsin
+        name: "Sevil Ozdemir", 
         nickname,
         iat: Date.now()
       };
 
-      // Sahte token: payload'u JSON string olarak döndür
+    
       const token = JSON.stringify(payload);
 
       return { token, username: nickname };
@@ -100,7 +100,7 @@ createServer({
       let decoded;
 
       try {
-        decoded = JSON.parse(token); // Sahte token JSON string olduğu için parse ediliyor
+        decoded = JSON.parse(token); 
       } catch (e) {
         decoded = { sub: "1000", name: "Anonim", nickname: "anon" };
       }
