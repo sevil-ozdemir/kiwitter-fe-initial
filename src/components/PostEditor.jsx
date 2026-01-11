@@ -36,13 +36,14 @@ export default function PostEditor({ addPost }) {
         <span className="text-sm text-gray-400">{MAX_LENGTH - text.length} karakter kaldı</span>
         
         
-        <button
+       <button
   type="submit"
   disabled={disabled}
-  className={`px-2 py-1 rounded-md text-white ${disabled ? "bg-gray-400 cursor-not-allowed" : "bg-primary"}`}
+  className={`px-2 py-1 rounded-md text-white ${disabled ? "bg-gray-400 cursor-not-allowed" : "bg-lime-700"}`}
 >
   Gönder
 </button>
+
 
       </div>
     </form>
