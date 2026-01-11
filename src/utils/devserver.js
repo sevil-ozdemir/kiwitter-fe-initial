@@ -45,7 +45,7 @@ function generateObjects(n) {
   for (let i = 0; i < n; i++) {
     const author = generateRandomAuthors();
     const like = Math.floor(Math.random() * 30);
-    objects.push({
+    const obj = {
       id: window.crypto.randomUUID(),
       authorId: author.id,
       retweets: Math.floor(Math.random() * 10),
@@ -55,8 +55,9 @@ function generateObjects(n) {
       replies: Math.floor(Math.random() * 20),
       name: author.name,
       username: author.username
-    });
-    twitLikes[objects[i].id] = like;
+    };
+    objects.push(obj);
+    twitLikes[obj.id] = like;
   }
   return objects;
 }
@@ -75,11 +76,12 @@ createServer({
       const payload = {
         sub: "1000",
         name: "Sevil Ozdemir", // Burayı istediğin isimle değiştirebilirsin
-        nickname: nickname,
+        nickname,
         iat: Date.now()
       };
 
-      const token = btoa(JSON.stringify(payload));
+      // Sahte token: payload'u JSON string olarak döndür
+      const token = JSON.stringify(payload);
 
       return { token, username: nickname };
     });
@@ -95,7 +97,13 @@ createServer({
     this.post("/twits", (schema, request) => {
       const { content } = JSON.parse(request.requestBody);
       const token = request.requestHeaders["Authorization"]?.replace("Bearer ", "");
-      const decoded = jwtDecode(token);
+      let decoded;
+
+      try {
+        decoded = JSON.parse(token); // Sahte token JSON string olduğu için parse ediliyor
+      } catch (e) {
+        decoded = { sub: "1000", name: "Anonim", nickname: "anon" };
+      }
 
       const newTwit = {
         id: window.crypto.randomUUID(),
