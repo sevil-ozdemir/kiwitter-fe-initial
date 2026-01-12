@@ -1,15 +1,15 @@
 import axios from "axios";
 
-const axiosInstance = axios.create({
-  baseURL: "https://uppro-0825.workintech.com.tr/",
+const instance = axios.create({
+  baseURL: "/",
 });
 
 export const setToken = (token) => {
-  axiosInstance.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+  if (token) {
+    instance.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+  } else {
+    delete instance.defaults.headers.common["Authorization"];
+  }
 };
 
-export const removeToken = () => {
-  delete axiosInstance.defaults.headers.common["Authorization"];
-};
-
-export default axiosInstance;
+export default instance;

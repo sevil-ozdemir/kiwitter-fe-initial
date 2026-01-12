@@ -4,6 +4,8 @@ const initialState = {
   token: null,
   username: null,
   name: null,
+  role: "user",
+  id: null,
 };
 
 const userSlice = createSlice({
@@ -11,19 +13,19 @@ const userSlice = createSlice({
   initialState,
   reducers: {
     login: (state, action) => {
-      // action.payload token olabilir veya { token, username, name } objesi olabilir
-      if (typeof action.payload === "string") {
-        state.token = action.payload;
-      } else {
-        state.token = action.payload.token;
-        state.username = action.payload.username;
-        state.name = action.payload.name;
-      }
+      const payload = action.payload || {};
+      state.token = payload.token || null;
+      state.username = payload.username || state.username;
+      state.name = payload.name || state.name;
+      state.role = payload.role || state.role;
+      state.id = payload.id || state.id;
     },
     logout: (state) => {
       state.token = null;
       state.username = null;
       state.name = null;
+      state.role = "user";
+      state.id = null;
     },
   },
 });
