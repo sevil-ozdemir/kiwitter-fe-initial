@@ -65,20 +65,24 @@ function generateObjects(n) {
 const twitLikes = {};
 const twits = [...generateObjects(100)];
 
+// JWT parçaları (header.payload.signature) — jwtDecode ile çözülebilir
+const JWT_HEADER = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9"; // {"alg":"HS256","typ":"JWT"}
+const JWT_PAYLOAD_SEVIL = "eyJzdWIiOiIxMDAwIiwibmFtZSI6IlNldmlsIE96ZGVtaXIiLCJuaWNrbmFtZSI6InNldm96ZGVtaXIiLCJpYXQiOjE1MTYyMzkwMjJ9";
+const JWT_SIGNATURE_DUMMY = "dummy-signature";
+const FIXED_TOKEN_SEVIL = `${JWT_HEADER}.${JWT_PAYLOAD_SEVIL}.${JWT_SIGNATURE_DUMMY}`;
+
 createServer({
   routes() {
     this.urlPrefix = "https://uppro-0825.workintech.com.tr/";
 
-    //  Login endpoint: sabit token 
+    // Login — sabit, jwtDecode ile çözülebilir token
     this.post("/login", (schema, request) => {
       const { nickname } = JSON.parse(request.requestBody);
 
-      const token =
-        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9." +
-        "eyJzdWIiOiIxMDAwIiwibmFtZSI6IlNldmlsIE96ZGVtaXIiLCJuaWNrbmFtZSI6InNldm96ZGVtaXIiLCJpYXQiOjE1MTYyMzkwMjJ9." +
-        "dummy-signature";
-
-      return { token, username: nickname };
+      return {
+        token: FIXED_TOKEN_SEVIL,
+        username: nickname
+      };
     });
 
     this.post("/signup", () => {
@@ -91,19 +95,27 @@ createServer({
 
     this.post("/twits", (schema, request) => {
       const { content } = JSON.parse(request.requestBody);
-      const token = request.requestHeaders["Authorization"]?.replace("Bearer ", "");
-      const decoded = jwtDecode(token);
+      const rawAuth = request.requestHeaders["Authorization"] || "";
+      const token = rawAuth.startsWith("Bearer ") ? rawAuth.slice(7) : rawAuth;
+
+      let decoded;
+      try {
+        decoded = jwtDecode(token);
+      } catch (e) {
+        // Token çözülemezse güvenli fallback
+        decoded = { sub: "1000", name: "Anonim", nickname: "anon" };
+      }
 
       const newTwit = {
         id: window.crypto.randomUUID(),
-        authorId: decoded.sub,
+        authorId: decoded.sub || "1000",
         retweets: 0,
         content,
         createDate: Date.now(),
         likes: 0,
         replies: 0,
-        name: decoded.name,
-        username: decoded.nickname
+        name: decoded.name || "Anonim",
+        username: decoded.nickname || "anon"
       };
 
       twits.push(newTwit);
