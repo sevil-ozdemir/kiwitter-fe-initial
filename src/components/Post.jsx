@@ -1,6 +1,15 @@
 import axios from "../utils/axios";
+import { useState } from "react";
 
 export default function Post({ post, onDelete }) {
+  const [likes, setLikes] = useState(post.likes);
+
+  const handleLike = () => {
+    axios.post(`/twits/${post.id}/like`).then((res) => {
+      setLikes(res.data.count);
+    });
+  };
+
   const handleDelete = () => {
     axios.delete(`/twits/${post.id}`).then(() => {
       onDelete(post.id);
@@ -23,7 +32,7 @@ export default function Post({ post, onDelete }) {
         <p>{post.content}</p>
         <div className="flex justify-between items-center text-gray-500 text-sm mt-2">
           <div className="flex gap-4">
-            <span>❤️ {post.likes}</span>
+            <button onClick={handleLike} className="hover:text-red-500">❤️ {likes}</button>
             <span>💬 {post.replies}</span>
             <span>🔁 {post.retweets}</span>
           </div>
