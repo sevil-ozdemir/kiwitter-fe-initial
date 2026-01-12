@@ -47,7 +47,7 @@ function generateObjects(n) {
       content: generateRandomContent(),
       createDate: generateRandomDate(),
       likes: like,
-      replies: Math.floor(Math.random() * 20),
+      replies: [],
       name: author.name,
       username: author.username,
       avatarUrl: `https://i.pravatar.cc/150?u=${author.id}`
@@ -65,43 +65,35 @@ createServer({
   routes() {
     this.urlPrefix = "https://uppro-0825.workintech.com.tr/";
 
-    //  Login
+    // Login
     this.post("/login", (schema, request) => {
       const { nickname } = JSON.parse(request.requestBody);
-
       const token =
         "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9." +
-        "eyJzdWIiOiIyMDAxIiwibmFtZSI6IlNldmlsIE96ZGVtaXIiLCJuaWNrbmFtZSI6InNldm96ZGVtaXIiLCJpYXQiOjE2OTQ5MDAwMDB9." +
-        "dummy-signature";
-
+        btoa(JSON.stringify({ sub: "2001", name: "Sevil Ozdemir", nickname })) +
+        ".dummy-signature";
       return { token, username: nickname };
     });
 
-    //  Signup
+    // Signup
     this.post("/signup", (schema, request) => {
-      const { name, nickname, email, password } = JSON.parse(request.requestBody);
-
+      const { name, nickname, email } = JSON.parse(request.requestBody);
       const payload = {
         sub: window.crypto.randomUUID(),
         name,
         nickname,
         iat: Date.now()
       };
-
       const token =
         "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9." +
         btoa(JSON.stringify(payload)) +
         ".dummy-signature";
-
-      return {
-        token,
-        user: { id: payload.sub, name, nickname, email }
-      };
+      return { token, user: { id: payload.sub, name, nickname, email } };
     });
 
-    // Twit listesi
+    // Twit listesi (ana akış)
     this.get("/twits", () => {
-      return { twits };
+      return { twits: twits.filter(t => !t.replyTo) };
     });
 
     // Twit ekleme
@@ -124,32 +116,83 @@ createServer({
         content,
         createDate: Date.now(),
         likes: 0,
-        replies: 0,
+        replies: [],
         name: decoded.name || "Anonim",
         username: decoded.nickname || "anon",
         avatarUrl: "https://randomuser.me/api/portraits/women/65.jpg"
       };
 
-      twits = [newTwit, ...twits]; //  yeni post en üste ekleniyor
+      twits = [newTwit, ...twits];
       return { twit: newTwit };
     });
 
-    // Twit beğenme
+    // Twit beğenme (tek kullanıcı tek beğeni)
     this.post("/twits/:twitId/like", (schema, request) => {
       const { twitId } = request.params;
-      if (twitLikes[twitId]) {
-        twitLikes[twitId]++;
-      } else {
-        twitLikes[twitId] = 1;
+      const { userId } = JSON.parse(request.requestBody);
+      const twit = twits.find(t => t.id === twitId);
+      if (!twit) return new Response(404, {}, { error: "Twit bulunamadı" });
+      if (twit.likedBy?.includes(userId)) {
+        return new Response(400, {}, { error: "Zaten beğenildi" });
       }
-      return { count: twitLikes[twitId] };
+      twit.likes++;
+      twit.likedBy = [...(twit.likedBy || []), userId];
+      return { count: twit.likes };
     });
 
-    // Twit silme
+    // Reply ekleme
+    this.post("/twits/:twitId/reply", (schema, request) => {
+      const { twitId } = request.params;
+      const { content, author } = JSON.parse(request.requestBody);
+      const parent = twits.find(t => t.id === twitId);
+      if (!parent) return new Response(404, {}, { error: "Twit bulunamadı" });
+      if (parent.replyTo) return new Response(400, {}, { error: "Reply'lere reply yok" });
+
+      const reply = {
+        id: window.crypto.randomUUID(),
+        authorId: author,
+        content,
+        createDate: Date.now(),
+        likes: 0,
+        replies: [],
+        replyTo: parent.id,
+        name: "Reply User",
+        username: "reply_user",
+        avatarUrl: "https://randomuser.me/api/portraits/men/45.jpg"
+      };
+      twits = [reply, ...twits];
+      parent.replies.push(reply.id);
+      return { reply };
+    });
+
+    // Most liked (24 saat)
+    this.get("/twits/most-liked", () => {
+      const now = Date.now();
+      const last24h = now - 24 * 60 * 60 * 1000;
+      return {
+        twits: twits
+          .filter(t => t.createDate >= last24h && !t.replyTo)
+          .sort((a, b) => b.likes - a.likes)
+      };
+    });
+
+    // Profil twitleri
+    this.get("/twits/by/:username", (schema, request) => {
+      const { username } = request.params;
+      return { twits: twits.filter(t => t.username === username) };
+    });
+
+    // Twit silme (kendi twiti veya admin)
     this.delete("/twits/:twitId", (schema, request) => {
       const { twitId } = request.params;
-      twits = twits.filter(t => t.id !== twitId);
-      return { success: true };
+      const { userId, role } = JSON.parse(request.requestBody);
+      const twit = twits.find(t => t.id === twitId);
+      if (!twit) return new Response(404, {}, { error: "Twit bulunamadı" });
+      if (role === "admin" || twit.authorId === userId) {
+        twits = twits.filter(t => t.id !== twitId);
+        return { success: true };
+      }
+      return new Response(403, {}, { error: "Yetkisiz silme" });
     });
   }
 });
