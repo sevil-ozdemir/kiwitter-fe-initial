@@ -1,29 +1,106 @@
 import { useState } from "react";
 import { useDispatch } from "react-redux";
+import { useHistory } from "react-router-dom";
 import axios from "../utils/axios";
 import { login } from "../userSlice";
+import { setAuthToken } from "../utils/auth";
 
 export default function Signup() {
   const dispatch = useDispatch();
-  const [form, setForm] = useState({ name: "", nickname: "", email: "", password: "" });
+  const history = useHistory();
 
-  const handleSubmit = (e) => {
+  const [formData, setFormData] = useState({
+    name: "",
+    nickname: "",
+    email: "",
+    password: ""
+  });
+  const [error, setError] = useState(null);
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    axios.post("/signup", form).then((res) => {
-      // signup sonrası otomatik login
-      dispatch(login(res.data.token));
-    });
+    setError(null);
+
+    try {
+      const res = await axios.post("/signup", formData);
+      const { token, user } = res.data;
+
+      // Token kaydet
+      setAuthToken(token);
+      dispatch(login({ 
+        token, 
+        username: user.nickname, 
+        name: user.name, 
+        id: user.id, 
+        role: "user" 
+      }));
+
+      history.push("/"); // ana sayfaya yönlendir
+    } catch (err) {
+      console.error("Signup error:", err);
+      setError("Kayıt başarısız. Lütfen tekrar deneyin.");
+    }
   };
 
   return (
-    <div className="flex flex-col items-center gap-4 p-8">
-      <h2 className="text-xl font-bold">Kayıt Ol</h2>
-      <form onSubmit={handleSubmit} className="flex flex-col gap-2 w-64">
-        <input placeholder="Ad" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
-        <input placeholder="Nickname" value={form.nickname} onChange={(e) => setForm({ ...form, nickname: e.target.value })} />
-        <input placeholder="Email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
-        <input type="password" placeholder="Şifre" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} />
-        <button type="submit" className="bg-green-500 text-white px-4 py-2 rounded">Kayıt Ol</button>
+    <div className="max-w-md mx-auto mt-10 p-6 border rounded shadow bg-white">
+      <h2 className="text-2xl font-bold mb-4">Kayıt Ol</h2>
+      {error && <p className="text-red-600 mb-3">{error}</p>}
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <label className="block mb-1">Ad Soyad</label>
+          <input
+            type="text"
+            name="name"
+            value={formData.name}
+            onChange={handleChange}
+            className="w-full border px-3 py-2 rounded"
+            required
+          />
+        </div>
+        <div>
+          <label className="block mb-1">Kullanıcı Adı (nickname)</label>
+          <input
+            type="text"
+            name="nickname"
+            value={formData.nickname}
+            onChange={handleChange}
+            className="w-full border px-3 py-2 rounded"
+            required
+          />
+        </div>
+        <div>
+          <label className="block mb-1">E-posta</label>
+          <input
+            type="email"
+            name="email"
+            value={formData.email}
+            onChange={handleChange}
+            className="w-full border px-3 py-2 rounded"
+            required
+          />
+        </div>
+        <div>
+          <label className="block mb-1">Şifre</label>
+          <input
+            type="password"
+            name="password"
+            value={formData.password}
+            onChange={handleChange}
+            className="w-full border px-3 py-2 rounded"
+            required
+          />
+        </div>
+        <button
+          type="submit"
+          className="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700"
+        >
+          Kayıt Ol
+        </button>
       </form>
     </div>
   );
