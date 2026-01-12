@@ -65,6 +65,7 @@ createServer({
   routes() {
     this.urlPrefix = "https://uppro-0825.workintech.com.tr/";
 
+    //  Login
     this.post("/login", (schema, request) => {
       const { nickname } = JSON.parse(request.requestBody);
 
@@ -76,10 +77,34 @@ createServer({
       return { token, username: nickname };
     });
 
+    //  Signup
+    this.post("/signup", (schema, request) => {
+      const { name, nickname, email, password } = JSON.parse(request.requestBody);
+
+      const payload = {
+        sub: window.crypto.randomUUID(),
+        name,
+        nickname,
+        iat: Date.now()
+      };
+
+      const token =
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9." +
+        btoa(JSON.stringify(payload)) +
+        ".dummy-signature";
+
+      return {
+        token,
+        user: { id: payload.sub, name, nickname, email }
+      };
+    });
+
+    // Twit listesi
     this.get("/twits", () => {
       return { twits };
     });
 
+    // Twit ekleme
     this.post("/twits", (schema, request) => {
       const { content } = JSON.parse(request.requestBody);
       const rawAuth = request.requestHeaders["Authorization"] || "";
@@ -105,10 +130,11 @@ createServer({
         avatarUrl: "https://randomuser.me/api/portraits/women/65.jpg"
       };
 
-      twits = [newTwit, ...twits]; // ✅ yeni post en üste ekleniyor
+      twits = [newTwit, ...twits]; //  yeni post en üste ekleniyor
       return { twit: newTwit };
     });
 
+    // Twit beğenme
     this.post("/twits/:twitId/like", (schema, request) => {
       const { twitId } = request.params;
       if (twitLikes[twitId]) {
@@ -119,9 +145,10 @@ createServer({
       return { count: twitLikes[twitId] };
     });
 
+    // Twit silme
     this.delete("/twits/:twitId", (schema, request) => {
       const { twitId } = request.params;
-      twits = twits.filter(t => t.id !== twitId); // ✅ sadece ilgili twit silinir
+      twits = twits.filter(t => t.id !== twitId);
       return { success: true };
     });
   }
