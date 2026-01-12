@@ -70,6 +70,7 @@ createServer({
   routes() {
     this.urlPrefix = "https://uppro-0825.workintech.com.tr/";
 
+    // Login: sabit JWT token (Sevil Ozdemir / sevozdemir)
     this.post("/login", (schema, request) => {
       const { nickname } = JSON.parse(request.requestBody);
 
@@ -129,6 +130,19 @@ createServer({
       }
 
       return { count: twitLikes[twitId] };
+    });
+
+    //  Twit silme endpointi
+    this.delete("/twits/:twitId", (schema, request) => {
+      const { twitId } = request.params;
+      const index = twits.findIndex(t => t.id === twitId);
+
+      if (index !== -1) {
+        const deleted = twits.splice(index, 1)[0];
+        return { success: true, deleted };
+      }
+
+      return new Response(404, {}, { error: "Twit not found" });
     });
   }
 });

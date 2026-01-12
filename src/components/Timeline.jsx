@@ -1,22 +1,25 @@
+import { useEffect, useState } from "react";
+import axios from "../utils/axios";
+import Post from "./Post";
 
-import Post from "./Post.jsx";
+export default function Timeline() {
+  const [posts, setPosts] = useState([]);
 
-export default function Timeline({ posts, isLoading, isSuccess }) {
+  useEffect(() => {
+    axios.get("/twits").then((res) => {
+      setPosts(res.data.twits);
+    });
+  }, []);
 
-  if (isLoading) {
+  const handleDelete = (id) => {
+    setPosts((prev) => prev.filter((post) => post.id !== id));
+  };
 
-    return <span>Yükleniyor...</span>
-  }
-
-  if (!isSuccess) {
-
-    return <span>Bir şeyler ters gitti</span>
-  }
-
-  const postItems = posts
-    .map(post => <Post key={post.id} post={post} />)
-
-  return <div className="flex flex-col gap-6">
-    {postItems}
-  </div>;
+  return (
+    <div className="container mx-auto w-[40vw] py-8">
+      {posts.map((post) => (
+        <Post key={post.id} post={post} onDelete={handleDelete} />
+      ))}
+    </div>
+  );
 }
