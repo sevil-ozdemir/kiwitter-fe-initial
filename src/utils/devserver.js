@@ -26,16 +26,11 @@ function generateRandomAuthors() {
 
 function generateRandomContent() {
   const contents = [
-    "Hafıza geliştirme kursuna yazıldım. Nerede olduğunu hatırlamıyorum.",
-    "Bugün çok güzel bir gün. Her şey yolunda gidiyor.",
-    "Geçen hafta tatile gitmiştim. Harika bir deneyimdi.",
-    "Yeni bir hobim var. Şimdi her gün fotoğraf çekiyorum.",
-    "Çalışma odasında çok fazla kitap var. Hangi birini okuyacağımı bilemiyorum.",
-    "Dün akşam sinemaya gittim. Gerçekten çok iyi bir film izledim.",
-    "Yürüyüş yapmak gerçekten rahatlatıcı. Her gün yapmaya karar verdim.",
-    "Yoga yapmaya başladım. Bedeni ve ruhu dinlendirdiğini düşünüyorum.",
-    "Bugün işlerim çok yoğundu. Ama yine de keyif aldım.",
-    "Yeni bir dil öğrenmeye başladım. Zor ama bir o kadar eğlenceli."
+    "Bugün çok güzel bir gün.",
+    "Yeni bir hobim var.",
+    "Dün akşam sinemaya gittim.",
+    "Yoga yapmaya başladım.",
+    "Yeni bir dil öğreniyorum."
   ];
   return contents[Math.floor(Math.random() * contents.length)];
 }
@@ -64,13 +59,12 @@ function generateObjects(n) {
 }
 
 const twitLikes = {};
-const twits = [...generateObjects(100)];
+let twits = [...generateObjects(20)];
 
 createServer({
   routes() {
     this.urlPrefix = "https://uppro-0825.workintech.com.tr/";
 
-    // Login: sabit JWT token (Sevil Ozdemir / sevozdemir)
     this.post("/login", (schema, request) => {
       const { nickname } = JSON.parse(request.requestBody);
 
@@ -80,10 +74,6 @@ createServer({
         "dummy-signature";
 
       return { token, username: nickname };
-    });
-
-    this.post("/signup", () => {
-      return {};
     });
 
     this.get("/twits", () => {
@@ -98,7 +88,7 @@ createServer({
       let decoded;
       try {
         decoded = jwtDecode(token);
-      } catch (e) {
+      } catch {
         decoded = { sub: "2001", name: "Anonim", nickname: "anon" };
       }
 
@@ -115,34 +105,24 @@ createServer({
         avatarUrl: "https://randomuser.me/api/portraits/women/65.jpg"
       };
 
-      twits.push(newTwit);
-
+      twits = [newTwit, ...twits]; // ✅ yeni post en üste ekleniyor
       return { twit: newTwit };
     });
 
     this.post("/twits/:twitId/like", (schema, request) => {
       const { twitId } = request.params;
-
       if (twitLikes[twitId]) {
         twitLikes[twitId]++;
       } else {
         twitLikes[twitId] = 1;
       }
-
       return { count: twitLikes[twitId] };
     });
 
-    //  Twit silme endpointi
     this.delete("/twits/:twitId", (schema, request) => {
       const { twitId } = request.params;
-      const index = twits.findIndex(t => t.id === twitId);
-
-      if (index !== -1) {
-        const deleted = twits.splice(index, 1)[0];
-        return { success: true, deleted };
-      }
-
-      return new Response(404, {}, { error: "Twit not found" });
+      twits = twits.filter(t => t.id !== twitId); // ✅ sadece ilgili twit silinir
+      return { success: true };
     });
   }
 });
