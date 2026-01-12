@@ -54,7 +54,8 @@ function generateObjects(n) {
       likes: like,
       replies: Math.floor(Math.random() * 20),
       name: author.name,
-      username: author.username
+      username: author.username,
+      avatarUrl: `https://i.pravatar.cc/150?u=${author.id}`
     };
     objects.push(obj);
     twitLikes[obj.id] = like;
@@ -69,13 +70,12 @@ createServer({
   routes() {
     this.urlPrefix = "https://uppro-0825.workintech.com.tr/";
 
-    // Login: sabit JWT token (Sevil Ozdemir / sevozdemir)
     this.post("/login", (schema, request) => {
       const { nickname } = JSON.parse(request.requestBody);
 
       const token =
         "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9." +
-        "eyJzdWIiOiIxMDAwIiwibmFtZSI6IlNldmlsIE96ZGVtaXIiLCJuaWNrbmFtZSI6InNldm96ZGVtaXIiLCJpYXQiOjE2OTQ5MDAwMDB9." +
+        "eyJzdWIiOiIyMDAxIiwibmFtZSI6IlNldmlsIE96ZGVtaXIiLCJuaWNrbmFtZSI6InNldm96ZGVtaXIiLCJpYXQiOjE2OTQ5MDAwMDB9." +
         "dummy-signature";
 
       return { token, username: nickname };
@@ -98,19 +98,20 @@ createServer({
       try {
         decoded = jwtDecode(token);
       } catch (e) {
-        decoded = { sub: "1000", name: "Anonim", nickname: "anon" };
+        decoded = { sub: "2001", name: "Anonim", nickname: "anon" };
       }
 
       const newTwit = {
         id: window.crypto.randomUUID(),
-        authorId: decoded.sub || "1000",
+        authorId: decoded.sub || "2001",
         retweets: 0,
         content,
         createDate: Date.now(),
         likes: 0,
         replies: 0,
         name: decoded.name || "Anonim",
-        username: decoded.nickname || "anon"
+        username: decoded.nickname || "anon",
+        avatarUrl: "https://randomuser.me/api/portraits/women/65.jpg"
       };
 
       twits.push(newTwit);
