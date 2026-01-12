@@ -1,5 +1,5 @@
 import { createServer, Response } from "miragejs";
-import jwtDecode from "jwt-decode";
+import { jwtDecode } from "jwt-decode";
 
 function generateRandomDate() {
   const start = new Date(2025, 0, 1);
@@ -65,24 +65,20 @@ function generateObjects(n) {
 const twitLikes = {};
 const twits = [...generateObjects(100)];
 
-// JWT parçaları (header.payload.signature) — jwtDecode ile çözülebilir
-const JWT_HEADER = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9"; // {"alg":"HS256","typ":"JWT"}
-const JWT_PAYLOAD_SEVIL = "eyJzdWIiOiIxMDAwIiwibmFtZSI6IlNldmlsIE96ZGVtaXIiLCJuaWNrbmFtZSI6InNldm96ZGVtaXIiLCJpYXQiOjE1MTYyMzkwMjJ9";
-const JWT_SIGNATURE_DUMMY = "dummy-signature";
-const FIXED_TOKEN_SEVIL = `${JWT_HEADER}.${JWT_PAYLOAD_SEVIL}.${JWT_SIGNATURE_DUMMY}`;
-
 createServer({
   routes() {
     this.urlPrefix = "https://uppro-0825.workintech.com.tr/";
 
-    // Login — sabit, jwtDecode ile çözülebilir token
+    // Login: sabit JWT token (Sevil Ozdemir / sevozdemir)
     this.post("/login", (schema, request) => {
       const { nickname } = JSON.parse(request.requestBody);
 
-      return {
-        token: FIXED_TOKEN_SEVIL,
-        username: nickname
-      };
+      const token =
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9." +
+        "eyJzdWIiOiIxMDAwIiwibmFtZSI6IlNldmlsIE96ZGVtaXIiLCJuaWNrbmFtZSI6InNldm96ZGVtaXIiLCJpYXQiOjE2OTQ5MDAwMDB9." +
+        "dummy-signature";
+
+      return { token, username: nickname };
     });
 
     this.post("/signup", () => {
@@ -102,7 +98,6 @@ createServer({
       try {
         decoded = jwtDecode(token);
       } catch (e) {
-        // Token çözülemezse güvenli fallback
         decoded = { sub: "1000", name: "Anonim", nickname: "anon" };
       }
 
