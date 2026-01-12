@@ -25,14 +25,9 @@ export default function Home() {
 
   return (
     <div className="container mx-auto w-[40vw] py-8">
-          <div className="mb-6">
+      <div className="mb-6">
         <label className="block font-semibold mb-1">Düşüncelerini yaz</label>
-        <textarea
-          id="newPost"
-          className="w-full border p-2 rounded"
-          maxLength={160}
-          placeholder="160 karakter kaldı"
-        />
+        <textarea id="newPost" className="w-full border p-2 rounded" maxLength={160} placeholder="160 karakter kaldı" />
         <button
           onClick={() => {
             const content = document.getElementById("newPost").value;
@@ -47,7 +42,6 @@ export default function Home() {
         </button>
       </div>
 
-      {/* Post listesi */}
       <Timeline posts={posts} onDelete={handleDelete} />
     </div>
   );

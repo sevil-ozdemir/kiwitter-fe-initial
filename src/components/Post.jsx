@@ -3,7 +3,7 @@ import axios from "../utils/axios";
 export default function Post({ post, onDelete }) {
   const handleDelete = () => {
     axios.delete(`/twits/${post.id}`).then(() => {
-      onDelete(post.id); // üst bileşene bildir
+      onDelete(post.id);
     });
   };
 

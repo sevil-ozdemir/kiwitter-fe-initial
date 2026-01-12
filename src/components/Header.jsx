@@ -1,34 +1,20 @@
-import { Link } from "react-router-dom";
-import { useDispatch, useSelector } from 'react-redux';
-import { selectUser, logout } from '../userSlice.js';
+import { useContext } from "react";
+import { AuthContext } from "../contexts/AuthContext";
 
 export default function Header() {
+  const { user, logout } = useContext(AuthContext);
 
-  const dispatch = useDispatch();
-  const user = useSelector(selectUser);
-  const isLoggedIn = !!user;
-
-  let links;
-
-  const handleLogout = () => {
-    dispatch(logout());
-  }
-
-  if (isLoggedIn) {
-    links = <>
-      <a href="#" onClick={handleLogout}>Çıkış Yap</a>
-    </>;
-  } else {
-    links = <>
-      <Link to="/login">Giriş Yap</Link>
-      <Link to="/signup">Kayıt Ol</Link>
-    </>;
-  }
-
-  return <header className="container mx-auto p-6 text-primary flex flex-row justify-between items-center">
-    <Link to="/"><h1 className="text-2xl font-bold">kiwitter</h1></Link>
-    <nav className="font-bold text-sm flex flex-row gap-4">
-      {links}
-    </nav>
-  </header>
+  return (
+    <div className="flex justify-between items-center p-4 bg-gray-100">
+      <span className="font-bold">Kiwitter</span>
+      {user ? (
+        <div className="flex gap-4 items-center">
+          <span>{user.name || user.username}</span>
+          <button onClick={logout} className="text-red-500">Çıkış Yap</button>
+        </div>
+      ) : (
+        <span>Misafir</span>
+      )}
+    </div>
+  );
 }
