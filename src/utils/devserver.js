@@ -50,7 +50,8 @@ function generateObjects(n) {
       replies: [],
       name: author.name,
       username: author.username,
-      avatarUrl: `https://i.pravatar.cc/150?u=${author.id}`
+      avatarUrl: `https://i.pravatar.cc/150?u=${author.id}`,
+      likedBy: []
     };
     objects.push(obj);
     twitLikes[obj.id] = like;
@@ -68,9 +69,16 @@ createServer({
     // Login
     this.post("/login", (schema, request) => {
       const { nickname } = JSON.parse(request.requestBody);
+      const payload = {
+        sub: "2001",
+        name: "Sevil Ozdemir",
+        nickname,
+        role: "user",
+        iat: Date.now()
+      };
       const token =
         "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9." +
-        btoa(JSON.stringify({ sub: "2001", name: "Sevil Ozdemir", nickname })) +
+        btoa(JSON.stringify(payload)) +
         ".dummy-signature";
       return { token, username: nickname };
     });
@@ -82,6 +90,7 @@ createServer({
         sub: window.crypto.randomUUID(),
         name,
         nickname,
+        role: "user",
         iat: Date.now()
       };
       const token =
@@ -119,7 +128,8 @@ createServer({
         replies: [],
         name: decoded.name || "Anonim",
         username: decoded.nickname || "anon",
-        avatarUrl: "https://randomuser.me/api/portraits/women/65.jpg"
+        avatarUrl: "https://randomuser.me/api/portraits/women/65.jpg",
+        likedBy: []
       };
 
       twits = [newTwit, ...twits];
@@ -132,11 +142,11 @@ createServer({
       const { userId } = JSON.parse(request.requestBody);
       const twit = twits.find(t => t.id === twitId);
       if (!twit) return new Response(404, {}, { error: "Twit bulunamadı" });
-      if (twit.likedBy?.includes(userId)) {
+      if (twit.likedBy.includes(userId)) {
         return new Response(400, {}, { error: "Zaten beğenildi" });
       }
       twit.likes++;
-      twit.likedBy = [...(twit.likedBy || []), userId];
+      twit.likedBy.push(userId);
       return { count: twit.likes };
     });
 
@@ -158,7 +168,8 @@ createServer({
         replyTo: parent.id,
         name: "Reply User",
         username: "reply_user",
-        avatarUrl: "https://randomuser.me/api/portraits/men/45.jpg"
+        avatarUrl: "https://randomuser.me/api/portraits/men/45.jpg",
+        likedBy: []
       };
       twits = [reply, ...twits];
       parent.replies.push(reply.id);
