@@ -1,4 +1,5 @@
 import { useDispatch, useSelector } from "react-redux";
+import { Link } from "react-router-dom";
 import { logout } from "../userSlice";
 
 export default function Header() {
@@ -12,15 +13,23 @@ export default function Header() {
 
   return (
     <div className="flex justify-between items-center p-4 bg-gray-100">
-      <span className="font-bold">Kiwitter</span>
-      {user && user.token ? (
-        <div className="flex gap-4 items-center">
-          <span>{user.name || user.username}</span>
-          <button onClick={handleLogout} className="text-red-500">Çıkış Yap</button>
-        </div>
-      ) : (
-        <span>Misafir</span>
-      )}
+      <span className="font-bold text-xl">Kiwitter</span>
+      <div className="flex gap-4 items-center">
+        {!user || !user.token ? (
+          <>
+            <Link to="/login" className="text-blue-500 hover:underline">
+              Giriş
+            </Link>
+            <Link to="/signup" className="text-green-500 hover:underline">
+              Signup
+            </Link>
+          </>
+        ) : (
+          <button onClick={handleLogout} className="text-red-500 hover:underline">
+            Çıkış
+          </button>
+        )}
+      </div>
     </div>
   );
 }
