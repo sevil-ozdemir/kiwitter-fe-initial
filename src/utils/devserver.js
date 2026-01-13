@@ -1,193 +1,226 @@
-import { createServer, Response } from "miragejs";
+import { createServer, Response } from "miragejs"
 import { jwtDecode } from "jwt-decode";
 
 function generateRandomDate() {
-  const start = new Date(2025, 0, 1);
-  const end = new Date();
-  const randomDate = new Date(
-    start.getTime() + Math.random() * (end.getTime() - start.getTime())
-  );
-  return randomDate.getTime();
+    const start = new Date(2025, 0, 1); // Start date: Jan 1, 2025
+    const end = new Date(); // End date: current date
+    const randomDate = new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()));
+    return randomDate.getTime()
 }
 
 const authors = [
-  { id: 1, name: "Ahmet Yılmaz", username: "chaotic_orange" },
-  { id: 2, name: "Ayşe Demir", username: "sunny_rose" },
-  { id: 3, name: "Murat Kaya", username: "blue_hawk" },
-  { id: 4, name: "Fatma Aslan", username: "wild_berry" },
-  { id: 5, name: "Mehmet Can", username: "quiet_storm" },
-  { id: 6, name: "Elif Yılmaz", username: "soft_moon" },
-  { id: 7, name: "Kemal Erdem", username: "green_earth" },
-  { id: 8, name: "Zeynep Şahin", username: "silver_wings" },
-  { id: 9, name: "Ali Vural", username: "golden_dream" },
-  { id: 10, name: "Selin Güler", username: "silent_waves" },
+    { id: 1, name: "Ahmet Yılmaz", username: "chaotic_orange" },
+    { id: 2, name: "Ayşe Demir", username: "sunny_rose" },
+    { id: 3, name: "Murat Kaya", username: "blue_hawk" },
+    { id: 4, name: "Fatma Aslan", username: "wild_berry" },
+    { id: 5, name: "Mehmet Can", username: "quiet_storm" },
+    { id: 6, name: "Elif Yılmaz", username: "soft_moon" },
+    { id: 7, name: "Kemal Erdem", username: "green_earth" },
+    { id: 8, name: "Zeynep Şahin", username: "silver_wings" },
+    { id: 9, name: "Ali Vural", username: "golden_dream" },
+    { id: 10, name: "Selin Güler", username: "silent_waves" }
 ];
 
 function generateRandomAuthors() {
-  return authors[Math.floor(Math.random() * authors.length)];
+
+    return authors[Math.floor(Math.random() * authors.length)];
 }
 
 function generateRandomContent() {
-  const contents = [
-    "Bugün çok güzel bir gün.",
-    "Yeni bir hobim var.",
-    "Dün akşam sinemaya gittim.",
-    "Yoga yapmaya başladım.",
-    "Yeni bir dil öğreniyorum.",
-  ];
-  return contents[Math.floor(Math.random() * contents.length)];
+    const contents = [
+        "Hafıza geliştirme kursuna yazıldım. Nerede olduğunu hatırlamıyorum.",
+        "Bugün çok güzel bir gün. Her şey yolunda gidiyor.",
+        "Geçen hafta tatile gitmiştim. Harika bir deneyimdi.",
+        "Yeni bir hobim var. Şimdi her gün fotoğraf çekiyorum.",
+        "Çalışma odasında çok fazla kitap var. Hangi birini okuyacağımı bilemiyorum.",
+        "Dün akşam sinemaya gittim. Gerçekten çok iyi bir film izledim.",
+        "Yürüyüş yapmak gerçekten rahatlatıcı. Her gün yapmaya karar verdim.",
+        "Yoga yapmaya başladım. Bedeni ve ruhu dinlendirdiğini düşünüyorum.",
+        "Bugün işlerim çok yoğundu. Ama yine de keyif aldım.",
+        "Yeni bir dil öğrenmeye başladım. Zor ama bir o kadar eğlenceli."
+    ];
+    return contents[Math.floor(Math.random() * contents.length)];
 }
 
 function generateObjects(n, fillReplies = false) {
-  const objects = [];
-  for (let i = 0; i < n; i++) {
-    const author = generateRandomAuthors();
-    const like = Math.floor(Math.random() * 30);
-    objects.push({
-      id: window.crypto.randomUUID(),
-      authorId: author.id,
-      retweets: Math.floor(Math.random() * 10),
-      content: generateRandomContent(),
-      createDate: generateRandomDate(),
-      likes: like,
-      replies: fillReplies ? generateObjects(3, false) : [],
-      name: author.name,
-      username: author.username,
-    });
-  }
-  return objects;
+    const objects = [];
+    for (let i = 0; i < n; i++) {
+        const author = generateRandomAuthors();
+        const like = Math.floor(Math.random() * 30);
+        objects.push({
+            "id": window.crypto.randomUUID(),
+            "authorId": author.id,
+            "retweets": Math.floor(Math.random() * 10),
+            "content": generateRandomContent(),
+            "createDate": generateRandomDate(),
+            "likes": like,
+            "replies": fillReplies ? generateObjects(3, false) : [],
+            "name": author.name,
+            "username": author.username
+        });
+    }
+
+    return objects;
 }
 
-const twitsLikedByUser = {};
-let twits = [...generateObjects(50, true)];
+const twitsLikedByUser = {
+
+}
+
+const twits = [
+    ...generateObjects(100, true)
+];
+
+console.log("twits backend", twits);
+
 createServer({
-  routes() {
-    this.urlPrefix = "https://uppro-0825.workintech.com.tr/";
 
-    // Login
-    this.post("/login", (schema, request) => {
-      const { nickname } = JSON.parse(request.requestBody);
-      const payload = {
-        sub: "1000",
-        name: "Demo User",
-        nickname,
-        role: "user",
-        iat: Date.now(),
-      };
-      const token =
-        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9." +
-        btoa(JSON.stringify(payload)) +
-        ".dummy-signature";
-      return { token, username: nickname };
-    });
+    routes() {
 
-    // Signup
-    this.post("/signup", (schema, request) => {
-      const { name, nickname, email } = JSON.parse(request.requestBody);
-      return {
-        user: { id: window.crypto.randomUUID(), name, nickname, email },
-      };
-    });
+        this.urlPrefix = 'https://uppro-0825.workintech.com.tr/';
 
-    // Twit listesi
-    this.get("/twits", (schema, request) => {
-      const token = request.requestHeaders["Authorization"];
-      if (token) {
-        const decoded = jwtDecode(token);
-        const { sub: userId } = decoded;
-        return {
-          twits: twits.map((twit) => ({
-            ...twit,
-            likedByUser:
-              twitsLikedByUser[userId] &&
-              twitsLikedByUser[userId].includes(twit.id),
-          })),
-        };
-      }
-      return { twits };
-    });
+        this.post("/login", (schema, request) => {
 
-    // Twit ekleme
-    this.post("/twits", (schema, request) => {
-      const { content } = JSON.parse(request.requestBody);
-      const token = request.requestHeaders["Authorization"];
-      const decoded = jwtDecode(token);
-      const { sub: userId, name, nickname } = decoded;
+            const { nickname } = JSON.parse(request.requestBody);
 
-      const newTwit = {
-        id: window.crypto.randomUUID(),
-        authorId: userId,
-        retweets: 0,
-        content,
-        createDate: Date.now(),
-        likes: 0,
-        replies: [],
-        name,
-        username: nickname,
-      };
-      twits.unshift(newTwit);
-      return { twit: newTwit };
-    });
+            return {
+                token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMDAwIiwibmFtZSI6IkRlbml6IEFjYXkiLCJuaWNrbmFtZSI6ImRhY2F5IiwiaWF0IjoxNTE2MjM5MDIyfQ.PIHhOqu6GNcStitQ70xfKU9ffDUtjj7Blkhu8RjfUzw",
+                username: nickname,
+            }
+            // return new Response(401);
+        });
 
-    // Twit beğenme
-    this.post("/twits/:twitId/like", (schema, request) => {
-      const { twitId } = request.params;
-      const token = request.requestHeaders["Authorization"];
-      const { sub: userId } = jwtDecode(token);
-      const twit = twits.find((t) => t.id === twitId);
-      if (!twit) return new Response(404, {}, { error: "Twit bulunamadı" });
+        this.post("/signup", () => {
 
-      if (!twitsLikedByUser[userId]) twitsLikedByUser[userId] = [];
-      if (!twitsLikedByUser[userId].includes(twitId)) {
-        twitsLikedByUser[userId].push(twitId);
-        twit.likes++;
-      }
-      return { count: twit.likes, likedByUser: true };
-    });
+            return {};
+        })
 
-    // Twit unlike
-    this.delete("/twits/:twitId/like", (schema, request) => {
-      const { twitId } = request.params;
-      const token = request.requestHeaders["Authorization"];
-      const { sub: userId } = jwtDecode(token);
-      const twit = twits.find((t) => t.id === twitId);
-      if (!twit) return new Response(404, {}, { error: "Twit bulunamadı" });
+        this.get("/twits", (schema, request) => {
 
-      if (twitsLikedByUser[userId]) {
-        twitsLikedByUser[userId] = twitsLikedByUser[userId].filter(
-          (id) => id !== twitId
-        );
-        if (twit.likes > 0) twit.likes--;
-      }
-      return { count: twit.likes, likedByUser: false };
-    });
+            const token = request.requestHeaders['Authorization'];
 
-    // Twit silme
-    this.delete("/twits/:twitId", (schema, request) => {
-      const { twitId } = request.params;
-      const token = request.requestHeaders["Authorization"];
-      const { sub: userId, role } = jwtDecode(token);
-      const twit = twits.find((t) => t.id === twitId);
-      if (!twit) return new Response(404, {}, { error: "Twit bulunamadı" });
-      if (role === "admin" || twit.authorId === userId) {
-        twits = twits.filter((t) => t.id !== twitId);
-        return { success: true };
-      }
-      return new Response(403, {}, { error: "Yetkisiz silme" });
-    });
+            if (token) {
 
-    // Kullanıcı bilgisi
-    this.get("/users/me", (schema, request) => {
-      const token = request.requestHeaders["Authorization"];
-      const { sub: id, name, nickname: username } = jwtDecode(token);
-      return { id, name, username };
-    });
+                const decoded = jwtDecode(token);
+                const { sub: userId } = decoded;
 
-    this.get("/users/:username", (schema, request) => {
-      const { username } = request.params;
-      const author = authors.find((a) => a.username === username);
-      if (author) return author;
-      return new Response(404, {}, { error: "Kullanıcı bulunamadı" });
-    });
-  },
+                return {
+                    twits: twits.map(twit => ({
+                        ...twit,
+                        likedByUser: twitsLikedByUser[userId] && twitsLikedByUser[userId].includes(twit.id) ? true : false
+                    }))
+                }
+            } else {
+
+                return {
+                    twits
+                }
+            }
+        })
+
+        this.post("/twits", (schema, request) => {
+
+            const { content } = JSON.parse(request.requestBody);
+            const token = request.requestHeaders['Authorization'];
+
+            const decoded = jwtDecode(token);
+            const { sub: userId } = decoded;
+
+            const newTwit = {
+                "id": window.crypto.randomUUID(),
+                "authorId": 1000,
+                "retweets": 0,
+                "content": content,
+                "createDate": Date.now(),
+                "likes": 0,
+                "replies": [],
+                "name": decoded.name,
+                "username": decoded.nickname,
+            }
+
+            twits.push(newTwit);
+
+            return {
+                twit: newTwit
+            }
+        });
+
+        this.post("/twits/:twitId/like", (schema, request) => {
+
+            const { twitId } = request.params;
+            const token = request.requestHeaders['Authorization'];
+
+            const { sub: userId } = jwtDecode(token);
+
+            const twit = twits.find(twit => twit.id === twitId);
+
+            if (twitsLikedByUser[userId]) {
+
+                twitsLikedByUser[userId].push(twitId);
+
+            } else {
+
+                twitsLikedByUser[userId] = [twitId];
+            }
+
+            twit.likes++;
+
+            return {
+                count: twit.likes
+            }
+        });
+
+        this.delete("/twits/:twitId/like", (schema, request) => {
+
+            const { twitId } = request.params;
+            const token = request.requestHeaders['Authorization'];
+
+            const { sub: userId } = jwtDecode(token);
+
+            const twit = twits.find(twit => twit.id === twitId);
+
+            if (!twitsLikedByUser[userId]) {
+
+                return new Response(200);
+            }
+
+            twitsLikedByUser[userId] = twitsLikedByUser[userId].filter(id => id !== twitId);
+
+            twit.likes--;
+
+            return {
+                count: twit.likes,
+                likedByUser: false
+            }
+        });
+
+        this.get("/users/me", (schema, request) => {
+
+            const token = request.requestHeaders['Authorization'];
+
+            const { sub: id, name, nickname: username } = jwtDecode(token);
+
+            return {
+                id, name, username
+            }
+        });
+
+        this.get("/users/:username", (schema, request) => {
+
+            const { username } = request.params;
+
+            const author = authors.find(author => author.username === username);
+
+            if (author) {
+
+                return {
+                    id: author.id,
+                    name: author.name,
+                    username: author.username
+                }
+            }
+
+            return new Response(404);
+        });
+    },
 });

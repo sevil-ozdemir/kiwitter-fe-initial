@@ -1,34 +1,36 @@
-import { createSlice } from "@reduxjs/toolkit";
 
-const initialState = {
-  token: null,
-  username: null,
-  name: null,
-  role: "user",
-  id: null,
-};
+import { createSlice } from '@reduxjs/toolkit';
+import { setAuthToken, removeAuthToken } from './utils/auth.js';
+import { jwtDecode } from 'jwt-decode';
 
 const userSlice = createSlice({
-  name: "user",
-  initialState,
+  name: 'twits',
+  initialState: {
+    token: null,
+    user: null,
+  },
   reducers: {
     login: (state, action) => {
-      const payload = action.payload || {};
-      state.token = payload.token || null;
-      state.username = payload.username || state.username;
-      state.name = payload.name || state.name;
-      state.role = payload.role || state.role;
-      state.id = payload.id || state.id;
+
+      const decoded = jwtDecode(action.payload);
+
+      state.token = action.payload;
+      state.user = decoded;
+
+      setAuthToken(action.payload);
     },
     logout: (state) => {
+
       state.token = null;
-      state.username = null;
-      state.name = null;
-      state.role = "user";
-      state.id = null;
+      state.user = null;
+
+      removeAuthToken();
     },
   },
 });
 
 export const { login, logout } = userSlice.actions;
+
+export const selectUser = (state) => state.user.user;
+
 export default userSlice.reducer;
