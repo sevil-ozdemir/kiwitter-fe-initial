@@ -1,12 +1,10 @@
-import { configureStore } from "@reduxjs/toolkit";
-import userReducer from "./userSlice.js";
-import twitsReducer from "./twitsSlice.js";
+import { configureStore } from '@reduxjs/toolkit'
+import twitsSlice from './twitsSlice.js';
+import userSlice from './userSlice.js';
 
-const store = configureStore({
+export default configureStore({
   reducer: {
-    user: userReducer,
-    twits: twitsReducer,
+    twits: twitsSlice,
+    user: userSlice,
   },
 });
-
-export default store;
