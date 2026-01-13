@@ -62,8 +62,11 @@ export default function Profile() {
   return (
     <PageLayout className="">
       <div className="flex flex-col container mx-auto w-[60vw] p-4 gap-6 items-center">
-        <img src={`https://randomuser.me/api/portraits/women/${userInfo.id % 100}.jpg`} alt={userInfo.name} className="w-48 rounded-full aspect-square cursor-pointer" />
-
+        <img
+          src={`https://i.pravatar.cc/1200?u=${userInfo.id}`}
+          alt={userInfo.name}
+          className="w-48 rounded-full aspect-square cursor-pointer"
+        />
         <div className="text-center">
           <h1 className="text-2xl font-bold text-gray-800 pb-0">
             {userInfo.name}

@@ -1,42 +1,42 @@
-import { useState } from "react";
 
-export default function PostEditor({ addPost }) {
-  const [content, setContent] = useState("");
+import { useState } from "react";
+import axios from "../utils/axios.js";
+
+const MAX_LENGTH = 160;
+
+export default function PostEditor({ addPost, className = "" }) {
+
+  const [text, setText] = useState("");
+
+  const handleChange = (e) => {
+    setText(e.target.value);
+  }
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (content.trim() === "") return;
-    addPost(content.trim());
-    setContent("");
-  };
 
-  return (
-    <form
-      onSubmit={handleSubmit}
-      className="bg-white p-4 rounded-xl shadow-md w-[40vw]"
-    >
-      <label className="block text-gray-700 font-semibold mb-2">
-        Düşüncelerini yaz
-      </label>
-      <textarea
-        value={content}
-        onChange={(e) => setContent(e.target.value)}
-        maxLength={160}
-        rows={3}
-        className="w-full border border-gray-300 rounded-md p-2 resize-none"
-        placeholder="160 karaktere kadar..."
-      />
-      <div className="flex justify-between items-center mt-2">
-        <span className="text-sm text-gray-500">
-          {160 - content.length} karakter kaldı
-        </span>
-        <button
-          type="submit"
-          className="bg-lime-700 text-white px-4 py-2 rounded font-bold"
-        >
-          Gönder
-        </button>
+    axios
+      .post("/twits", { content: text })
+      .then(resp => {
+        addPost(resp.data.twit);
+      })
+      .catch(error => {
+        console.error(error);
+      })
+      .finally(() => {
+        setText("");
+      });
+  }
+
+  const disabled = text.length === 0;
+
+  return <div className={`flex flex-col container mx-auto bg-white w-[40vw] rounded-xl shadow-xl p-4 gap-6 ${className}`}>
+    <form onSubmit={handleSubmit}>
+      <textarea className="w-full h-32 border-solid border-[1px] rounded-md p-2" placeholder="Düşüncelerini yaz" value={text} onChange={handleChange} />
+      <div className="flex flex-row justify-between items-center">
+        <span className="text-sm text-gray-400">{MAX_LENGTH - text.length} karakter kaldı</span>
+        <button type="submit" className={`${disabled ? "bg-gray-400" : "bg-primary"} text-white px-2 py-1 rounded-md`}>Gönder</button>
       </div>
     </form>
-  );
+  </div>
 }

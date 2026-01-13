@@ -16,7 +16,6 @@ export default function Header() {
 
   if (isLoggedIn) {
     links = <>
-      <Link to="/">Ana Sayfa</Link>
       <a href="#" onClick={handleLogout}>Çıkış Yap</a>
     </>;
   } else {
