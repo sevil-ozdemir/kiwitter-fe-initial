@@ -94,7 +94,8 @@ export default function Post({ post, isReply = false, className = "" }) {
   return <div>
     <div className={`flex flex-row container mx-auto bg-white w-[40vw] rounded-xl ${isRepliesVisible ? "rounded-b-none" : ""} shadow-xl p-4 gap-6 ${className}`}>
       <div className="flex flex-col justify-start w-24">
-        <img onClick={handleProfileClick} src={`https://i.pravatar.cc/150?u=${post.authorId}`} alt={post.name} className="w-full rounded-full aspect-square cursor-pointer" />
+        <img onClick={handleProfileClick} src={`https://randomuser.me/api/portraits/women/${post.authorId % 100}.jpg`} alt={post.name} className="w-full rounded-full aspect-square cursor-pointer" />
+
       </div>
       <div className="flex flex-col gap-2 w-full">
         <div className="flex flex-row justify-between items-center">
