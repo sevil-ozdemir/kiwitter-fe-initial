@@ -1,6 +1,4 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { setAuthToken, removeAuthToken } from "./utils/auth.js";
-import { jwtDecode } from "jwt-decode";
 
 const initialState = {
   token: null,
@@ -11,26 +9,16 @@ const initialState = {
 };
 
 const userSlice = createSlice({
-  name: "user", // ✅ reducer adı doğru
+  name: "user",
   initialState,
   reducers: {
     login: (state, action) => {
-      const token = action.payload?.token || action.payload;
-      if (token) {
-        try {
-          const decoded = jwtDecode(token);
-
-          state.token = token;
-          state.username = decoded.username || null;
-          state.name = decoded.name || null;
-          state.role = decoded.role || "user";
-          state.id = decoded.id || null;
-
-          setAuthToken(token); // axios header ayarı
-        } catch (err) {
-          console.error("JWT decode failed", err);
-        }
-      }
+      const payload = action.payload || {};
+      state.token = payload.token || null;
+      state.username = payload.username || state.username;
+      state.name = payload.name || state.name;
+      state.role = payload.role || state.role;
+      state.id = payload.id || state.id;
     },
     logout: (state) => {
       state.token = null;
@@ -38,15 +26,9 @@ const userSlice = createSlice({
       state.name = null;
       state.role = "user";
       state.id = null;
-
-      removeAuthToken(); // axios header temizleme
     },
   },
 });
 
 export const { login, logout } = userSlice.actions;
-
-// ✅ Selector düzeltildi
-export const selectUser = (state) => state.user;
-
 export default userSlice.reducer;

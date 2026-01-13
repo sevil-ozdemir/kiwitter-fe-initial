@@ -1,8 +1,9 @@
 import queryString from "query-string";
 import AuthLayout from "../layouts/AuthLayout.jsx";
-import { useLocation, useHistory } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { toast } from "react-toastify";
+import { useHistory } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { login } from "../userSlice.js";
 import axios from "../utils/axios.js";
@@ -27,7 +28,8 @@ export default function Login() {
     axios
       .post("/login", data)
       .then((resp) => {
-        dispatch(login(resp.data.token));
+        // ✅ Orijinal hali: payload doğrudan login reducer'a gönderiliyor
+        dispatch(login(resp.data));
 
         toast.success("Giriş başarılı");
 
