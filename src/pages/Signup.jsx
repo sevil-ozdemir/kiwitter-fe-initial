@@ -1,107 +1,116 @@
-import { useState } from "react";
-import { useDispatch } from "react-redux";
+import AuthLayout from "../layouts/AuthLayout.jsx";
+import { useForm } from "react-hook-form";
+import axios from "../utils/axios.js";
+
+import { toast } from "react-toastify";
 import { useHistory } from "react-router-dom";
-import axios from "../utils/axios";
-import { login } from "../userSlice";
-import { setAuthToken } from "../utils/auth";
 
 export default function Signup() {
-  const dispatch = useDispatch();
   const history = useHistory();
 
-  const [formData, setFormData] = useState({
-    name: "",
-    nickname: "",
-    email: "",
-    password: ""
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm({
+    mode: "onChange",
   });
-  const [error, setError] = useState(null);
 
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
+  function handleSignup(data) {
+    axios
+      .post("/signup", data)
+      .then((response) => {
+        console.log(response.data);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError(null);
+        toast.success("Kayıt başarılı. Giriş yapabilirsiniz");
 
-    try {
-      const res = await axios.post("/signup", formData);
-      const { token, user } = res.data;
-
-      // Token kaydet
-      setAuthToken(token);
-      dispatch(login({ 
-        token, 
-        username: user.nickname, 
-        name: user.name, 
-        id: user.id, 
-        role: "user" 
-      }));
-
-      history.push("/"); // ana sayfaya yönlendir
-    } catch (err) {
-      console.error("Signup error:", err);
-      setError("Kayıt başarısız. Lütfen tekrar deneyin.");
-    }
-  };
+        setTimeout(() => {
+          history.push("/login");
+        }, 2000);
+      })
+      .catch((error) => {
+        console.log(error);
+        toast.error("Kayıt başarısız");
+      });
+  }
 
   return (
-    <div className="max-w-md mx-auto mt-10 p-6 border rounded shadow bg-white">
-      <h2 className="text-2xl font-bold mb-4">Kayıt Ol</h2>
-      {error && <p className="text-red-600 mb-3">{error}</p>}
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label className="block mb-1">Ad Soyad</label>
+    <AuthLayout>
+      <h1 className="text-3xl text-center font-semibold tracking-tighter text-lime-700">
+        Hoş Geldin!
+      </h1>
+      <form onSubmit={handleSubmit(handleSignup)}>
+        <div className="pt-4">
+          <div className="flex justify-between gap-2 items-baseline pb-1">
+            <label htmlFor="name">İsim Soyisim</label>
+            <span className="text-sm font-medium text-red-600">
+              {errors.name && errors.name.message.toString()}
+            </span>
+          </div>
           <input
             type="text"
-            name="name"
-            value={formData.name}
-            onChange={handleChange}
-            className="w-full border px-3 py-2 rounded"
-            required
+            className="w-full h-10 px-2 border rounded-md border-gray-300"
+            {...register("name", { required: "Bu alan zorunlu" })}
           />
         </div>
-        <div>
-          <label className="block mb-1">Kullanıcı Adı (nickname)</label>
+
+        <div className="pt-4">
+          <div className="flex justify-between gap-2 items-baseline pb-1">
+            <label htmlFor="nickname">Kullanıcı adı</label>
+            <span className="text-sm font-medium text-red-600">
+              {errors.nickname && errors.nickname.message.toString()}
+            </span>
+          </div>
           <input
             type="text"
-            name="nickname"
-            value={formData.nickname}
-            onChange={handleChange}
-            className="w-full border px-3 py-2 rounded"
-            required
+            className="w-full h-10 px-2 border rounded-md border-gray-300"
+            {...register("nickname", { required: "Bu alan zorunlu" })}
           />
         </div>
-        <div>
-          <label className="block mb-1">E-posta</label>
+
+        <div className="pt-4">
+          <div className="flex justify-between gap-2 items-baseline pb-1">
+            <label htmlFor="email">Email</label>
+            <span className="text-sm font-medium text-red-600">
+              {errors.email && errors.email.message.toString()}
+            </span>
+          </div>
           <input
             type="email"
-            name="email"
-            value={formData.email}
-            onChange={handleChange}
-            className="w-full border px-3 py-2 rounded"
-            required
+            className="w-full h-10 px-2 border rounded-md border-gray-300"
+            {...register("email", {
+              required: "Bu alan zorunlu",
+              pattern: {
+                value: /\S+@\S+\.\S+/,
+                message: "Geçerli bir email adresi girin",
+              },
+            })}
           />
         </div>
-        <div>
-          <label className="block mb-1">Şifre</label>
+
+        <div className="pt-4">
+          <div className="flex justify-between gap-2 items-baseline pb-1">
+            <label htmlFor="password">Şifre</label>
+            <span className="text-sm font-medium text-red-600">
+              {errors.password && errors.password.message.toString()}
+            </span>
+          </div>
           <input
             type="password"
-            name="password"
-            value={formData.password}
-            onChange={handleChange}
-            className="w-full border px-3 py-2 rounded"
-            required
+            className="w-full h-10 px-2 border rounded-md border-gray-300"
+            {...register("password", { required: "Bu alan zorunlu" })}
           />
         </div>
-        <button
-          type="submit"
-          className="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700"
-        >
-          Kayıt Ol
-        </button>
+
+        <div className="pt-4">
+          <button
+            type="submit"
+            className="h-12 text-center block w-full rounded-lg bg-lime-700 text-white font-bold uppercase"
+          >
+            Kayıt Ol
+          </button>
+        </div>
       </form>
-    </div>
+    </AuthLayout>
   );
 }

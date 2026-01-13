@@ -1,7 +1,12 @@
 import queryString from "query-string";
-import AuthLayout from "./layouts/AuthLayout";
+import AuthLayout from "../layouts/AuthLayout.jsx";
 import { useLocation } from "react-router-dom";
 import { useForm } from "react-hook-form";
+import { toast } from "react-toastify";
+import { useHistory } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { login } from "../userSlice.js";
+import axios from "../utils/axios.js";
 
 export default function Login() {
   const { search } = useLocation();
@@ -16,8 +21,25 @@ export default function Login() {
     mode: "onChange",
   });
 
+  const dispatch = useDispatch();
+  const history = useHistory();
+
   function handleLogin(data) {
-    console.log(data, "---");
+    axios
+      .post("/login", data)
+      .then((resp) => {
+        dispatch(login(resp.data.token));
+
+        toast.success("Giriş başarılı");
+
+        setTimeout(() => {
+          history.push("/");
+        }, 2000);
+      })
+      .catch((error) => {
+        console.log(error);
+        toast.error("Giriş başarısız");
+      });
   }
 
   return (
@@ -28,7 +50,7 @@ export default function Login() {
       <form onSubmit={handleSubmit(handleLogin)}>
         <div className="pt-4">
           <div className="flex justify-between gap-2 items-baseline pb-1">
-            <label htmlFor="nickname ">Kullanıcı adı</label>
+            <label htmlFor="nickname">Kullanıcı adı</label>
             <span className="text-sm font-medium text-red-600">
               {errors.nickname && errors.nickname.message.toString()}
             </span>
@@ -53,10 +75,11 @@ export default function Login() {
             {...register("password", { required: "Bu alan zorunlu" })}
           />
         </div>
+
         <div className="pt-4">
           <button
             type="submit"
-            className="h-12 text-center block w-full rounded-lg bg-lime-700 text-white font-bold "
+            className="h-12 text-center block w-full rounded-lg bg-lime-700 text-white font-bold"
           >
             GİRİŞ
           </button>
