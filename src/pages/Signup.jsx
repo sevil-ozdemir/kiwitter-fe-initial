@@ -1,7 +1,6 @@
 import AuthLayout from "../layouts/AuthLayout.jsx";
 import { useForm } from "react-hook-form";
 import axios from "../utils/axios.js";
-
 import { toast } from "react-toastify";
 import { useHistory } from "react-router-dom";
 
@@ -16,22 +15,20 @@ export default function Signup() {
     mode: "onChange",
   });
 
-  function handleSignup(data) {
-    axios
-      .post("/signup", data)
-      .then((response) => {
-        console.log(response.data);
+  async function handleSignup(data) {
+    try {
+      const response = await axios.post("/signup", data);
+      console.log(response.data);
 
-        toast.success("Kayıt başarılı. Giriş yapabilirsiniz");
+      toast.success("Kayıt başarılı. Giriş yapabilirsiniz");
 
-        setTimeout(() => {
-          history.push("/login");
-        }, 2000);
-      })
-      .catch((error) => {
-        console.log(error);
-        toast.error("Kayıt başarısız");
-      });
+      setTimeout(() => {
+        history.push("/login");
+      }, 2000);
+    } catch (error) {
+      console.error("Signup failed:", error);
+      toast.error("Kayıt başarısız");
+    }
   }
 
   return (
@@ -40,6 +37,7 @@ export default function Signup() {
         Hoş Geldin!
       </h1>
       <form onSubmit={handleSubmit(handleSignup)}>
+        {/* İsim Soyisim */}
         <div className="pt-4">
           <div className="flex justify-between gap-2 items-baseline pb-1">
             <label htmlFor="name">İsim Soyisim</label>
@@ -49,11 +47,13 @@ export default function Signup() {
           </div>
           <input
             type="text"
+            id="name"
             className="w-full h-10 px-2 border rounded-md border-gray-300"
             {...register("name", { required: "Bu alan zorunlu" })}
           />
         </div>
 
+        {/* Kullanıcı adı */}
         <div className="pt-4">
           <div className="flex justify-between gap-2 items-baseline pb-1">
             <label htmlFor="nickname">Kullanıcı adı</label>
@@ -63,11 +63,13 @@ export default function Signup() {
           </div>
           <input
             type="text"
+            id="nickname"
             className="w-full h-10 px-2 border rounded-md border-gray-300"
             {...register("nickname", { required: "Bu alan zorunlu" })}
           />
         </div>
 
+        {/* Email */}
         <div className="pt-4">
           <div className="flex justify-between gap-2 items-baseline pb-1">
             <label htmlFor="email">Email</label>
@@ -77,6 +79,7 @@ export default function Signup() {
           </div>
           <input
             type="email"
+            id="email"
             className="w-full h-10 px-2 border rounded-md border-gray-300"
             {...register("email", {
               required: "Bu alan zorunlu",
@@ -88,6 +91,7 @@ export default function Signup() {
           />
         </div>
 
+        {/* Şifre */}
         <div className="pt-4">
           <div className="flex justify-between gap-2 items-baseline pb-1">
             <label htmlFor="password">Şifre</label>
@@ -97,11 +101,13 @@ export default function Signup() {
           </div>
           <input
             type="password"
+            id="password"
             className="w-full h-10 px-2 border rounded-md border-gray-300"
             {...register("password", { required: "Bu alan zorunlu" })}
           />
         </div>
 
+        {/* Submit */}
         <div className="pt-4">
           <button
             type="submit"
