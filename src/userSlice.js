@@ -11,21 +11,25 @@ const initialState = {
 };
 
 const userSlice = createSlice({
-  name: "user",
+  name: "user", // ✅ reducer adı doğru
   initialState,
   reducers: {
     login: (state, action) => {
-      const token = action.payload?.token || action.payload; // hem {token} hem direkt string desteklenir
+      const token = action.payload?.token || action.payload;
       if (token) {
-        const decoded = jwtDecode(token);
+        try {
+          const decoded = jwtDecode(token);
 
-        state.token = token;
-        state.username = decoded.username || state.username;
-        state.name = decoded.name || state.name;
-        state.role = decoded.role || state.role;
-        state.id = decoded.id || state.id;
+          state.token = token;
+          state.username = decoded.username || null;
+          state.name = decoded.name || null;
+          state.role = decoded.role || "user";
+          state.id = decoded.id || null;
 
-        setAuthToken(token); // axios header ayarı
+          setAuthToken(token); // axios header ayarı
+        } catch (err) {
+          console.error("JWT decode failed", err);
+        }
       }
     },
     logout: (state) => {
@@ -42,12 +46,7 @@ const userSlice = createSlice({
 
 export const { login, logout } = userSlice.actions;
 
-// Kullanıcı bilgisini almak için selector
-export const selectUser = (state) => ({
-  id: state.user.id,
-  username: state.user.username,
-  name: state.user.name,
-  role: state.user.role,
-});
+// ✅ Selector düzeltildi
+export const selectUser = (state) => state.user;
 
 export default userSlice.reducer;

@@ -1,6 +1,6 @@
 import queryString from "query-string";
 import AuthLayout from "../layouts/AuthLayout.jsx";
-import { useLocation, useHistory } from "react-router-dom";
+import { useLocation, useHistory } from "react-router-dom"; // Eğer v6 kullanıyorsan useNavigate ile değiştir
 import { useForm } from "react-hook-form";
 import { toast } from "react-toastify";
 import { useDispatch } from "react-redux";
@@ -21,19 +21,19 @@ export default function Login() {
   });
 
   const dispatch = useDispatch();
-  const history = useHistory();
+  const history = useHistory(); // v6 ise useNavigate kullan
 
   async function handleLogin(data) {
     try {
       const resp = await axios.post("/login", data);
 
-      // ✅ Yeni userSlice login artık JWT token decode ediyor
+      // ✅ userSlice login artık JWT decode ediyor
       dispatch(login(resp.data.token));
 
       toast.success("Giriş başarılı");
 
       setTimeout(() => {
-        history.push("/");
+        history.push("/"); // v6 ise navigate("/")
       }, 2000);
     } catch (error) {
       console.error(error);
