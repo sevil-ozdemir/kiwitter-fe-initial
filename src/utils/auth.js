@@ -1,28 +1,22 @@
+
 import { setToken, removeToken } from "./axios.js";
 
-// Token set etme
 export const setAuthToken = (token) => {
-  if (token) {
-    console.debug("Authentication token: ", token);
 
-    // localStorage'a kaydet
-    localStorage.setItem("token", token);
+  console.debug("Authentication token: ", token);
 
-    // axios instance'a token ekle
-    setToken(token);
-  }
-};
+  localStorage.setItem("token", token);
 
-// Token alma
+  setToken(token);
+}
+
 export const getAuthToken = () => {
-  return localStorage.getItem("token");
-};
 
-// Token silme
+  return localStorage.getItem("token");
+}
+
 export const removeAuthToken = () => {
-  // localStorage'dan temizle
   localStorage.removeItem("token");
 
-  // axios instance'dan kaldır
   removeToken();
-};
+}
