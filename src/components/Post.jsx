@@ -1,3 +1,4 @@
+
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 dayjs.extend(relativeTime)
@@ -94,13 +95,7 @@ export default function Post({ post, isReply = false, className = "" }) {
   return <div>
     <div className={`flex flex-row container mx-auto bg-white w-[40vw] rounded-xl ${isRepliesVisible ? "rounded-b-none" : ""} shadow-xl p-4 gap-6 ${className}`}>
       <div className="flex flex-col justify-start w-24">
-        <img
-  onClick={handleProfileClick}
-  src="https://images.unsplash.com/photo-1502685104226-ee32379fefbe"
-  alt={post.name}
-  className="w-full rounded-full aspect-square cursor-pointer"
-/>
-
+        <img onClick={handleProfileClick} src={`https://i.pravatar.cc/150?u=${post.authorId}`} alt={post.name} className="w-full rounded-full aspect-square cursor-pointer" />
       </div>
       <div className="flex flex-col gap-2 w-full">
         <div className="flex flex-row justify-between items-center">
