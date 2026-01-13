@@ -4,6 +4,7 @@ import { useState } from "react";
 import PageLayout from "../layouts/PageLayout.jsx";
 import Post from "../components/Post.jsx";
 import PostEditor from "../components/PostEditor.jsx";
+import { twits as dummyTwits } from "../utils/devserver.js"; // dummy data import
 
 export default function Home() {
   const dispatch = useDispatch();
@@ -25,6 +26,22 @@ export default function Home() {
     };
     dispatch(addTwit(newTwit));
   };
+
+  // Dummy veriyi Redux'tan gelen twitlerle birleştir
+  let combinedTwits = [...dummyTwits, ...twits];
+
+  // Normal sekmesi: senin twitlerin hep en üstte
+  if (mode === "normal") {
+    combinedTwits = combinedTwits.sort((a, b) => b.createDate - a.createDate);
+    const myTwits = combinedTwits.filter(t => t.username === "sozdemir");
+    const otherTwits = combinedTwits.filter(t => t.username !== "sozdemir");
+    combinedTwits = [...myTwits, ...otherTwits];
+  }
+
+  // En beğenilenler sekmesi: like sayısına göre sıralama
+  if (mode === "most-liked") {
+    combinedTwits = combinedTwits.sort((a, b) => b.likes - a.likes);
+  }
 
   return (
     <PageLayout>
@@ -48,11 +65,10 @@ export default function Home() {
             En Beğenilenler
           </button>
         </div>
-        {twits.map((twit) => (
+        {combinedTwits.map((twit) => (
           <Post key={twit.id} post={twit} />
         ))}
       </div>
     </PageLayout>
   );
 }
-  
