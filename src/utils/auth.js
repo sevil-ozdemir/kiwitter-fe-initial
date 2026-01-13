@@ -1,7 +1,11 @@
-export const getAuthToken = () => localStorage.getItem("token");
+import axios from "./axios.js";
 
 export const setAuthToken = (token) => {
-  if (token) localStorage.setItem("token", token);
+  if (token) {
+    axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+  }
 };
 
-export const clearAuthToken = () => localStorage.removeItem("token");
+export const removeAuthToken = () => {
+  delete axios.defaults.headers.common["Authorization"];
+};

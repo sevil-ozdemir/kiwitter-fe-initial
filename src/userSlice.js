@@ -1,4 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit";
+import { setAuthToken, removeAuthToken } from "./utils/auth.js";
+import { jwtDecode } from "jwt-decode";
 
 const initialState = {
   token: null,
@@ -13,12 +15,18 @@ const userSlice = createSlice({
   initialState,
   reducers: {
     login: (state, action) => {
-      const payload = action.payload || {};
-      state.token = payload.token || null;
-      state.username = payload.username || state.username;
-      state.name = payload.name || state.name;
-      state.role = payload.role || state.role;
-      state.id = payload.id || state.id;
+      const token = action.payload?.token || action.payload; // hem {token} hem direkt string desteklenir
+      if (token) {
+        const decoded = jwtDecode(token);
+
+        state.token = token;
+        state.username = decoded.username || state.username;
+        state.name = decoded.name || state.name;
+        state.role = decoded.role || state.role;
+        state.id = decoded.id || state.id;
+
+        setAuthToken(token); // axios header ayarı
+      }
     },
     logout: (state) => {
       state.token = null;
@@ -26,9 +34,20 @@ const userSlice = createSlice({
       state.name = null;
       state.role = "user";
       state.id = null;
+
+      removeAuthToken(); // axios header temizleme
     },
   },
 });
 
 export const { login, logout } = userSlice.actions;
+
+// Kullanıcı bilgisini almak için selector
+export const selectUser = (state) => ({
+  id: state.user.id,
+  username: state.user.username,
+  name: state.user.name,
+  role: state.user.role,
+});
+
 export default userSlice.reducer;

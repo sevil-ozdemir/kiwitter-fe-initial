@@ -1,9 +1,8 @@
 import queryString from "query-string";
 import AuthLayout from "../layouts/AuthLayout.jsx";
-import { useLocation } from "react-router-dom";
+import { useLocation, useHistory } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { toast } from "react-toastify";
-import { useHistory } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { login } from "../userSlice.js";
 import axios from "../utils/axios.js";
@@ -24,22 +23,22 @@ export default function Login() {
   const dispatch = useDispatch();
   const history = useHistory();
 
-  function handleLogin(data) {
-    axios
-      .post("/login", data)
-      .then((resp) => {
-        dispatch(login(resp.data.token));
+  async function handleLogin(data) {
+    try {
+      const resp = await axios.post("/login", data);
 
-        toast.success("Giriş başarılı");
+      // ✅ Yeni userSlice login artık JWT token decode ediyor
+      dispatch(login(resp.data.token));
 
-        setTimeout(() => {
-          history.push("/");
-        }, 2000);
-      })
-      .catch((error) => {
-        console.log(error);
-        toast.error("Giriş başarısız");
-      });
+      toast.success("Giriş başarılı");
+
+      setTimeout(() => {
+        history.push("/");
+      }, 2000);
+    } catch (error) {
+      console.error(error);
+      toast.error("Giriş başarısız");
+    }
   }
 
   return (
