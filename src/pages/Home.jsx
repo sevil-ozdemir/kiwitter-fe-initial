@@ -1,48 +1,65 @@
-import { useState, useEffect } from "react";
-import axios from "../utils/axios";
-import Timeline from "../components/Timeline";
+import { useState, useEffect, useMemo } from "react";
+import { useDispatch, useSelector } from 'react-redux';
+import { loadTwits, addTwit, selectTwits } from '../twitsSlice.js';
+import { selectUser } from '../userSlice.js';
+import { toast } from 'react-toastify';
+
+import PageLayout from "../layouts/PageLayout.jsx";
+import Timeline from "../components/Timeline.jsx";
+import PostEditor from "../components/PostEditor.jsx";
+import TimelineSelector from "../components/TimelineSelector.jsx";
+
+import axios from "../utils/axios.js";
 
 export default function Home() {
-  const [posts, setPosts] = useState([]);
+
+  const [isLoading, setIsLoading] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
+  const [timelineMode, setTimelineMode] = useState("normal"); // normal, most_liked
+  const dispatch = useDispatch();
+
+  const posts = useSelector(selectTwits(timelineMode));
+  const user = useSelector(selectUser);
+
+  const isLoggedIn = !!user;
 
   useEffect(() => {
-    axios.get("/twits").then((res) => {
-      setPosts(res.data.twits);
-    });
+
+    setIsLoading(true);
+
+    axios.get("/twits")
+      .then(response => {
+
+        dispatch(loadTwits(response.data.twits));
+
+        setIsSuccess(true);
+      })
+      .catch(error => {
+        console.error(error);
+
+        toast.error("Bir hata oluştu");
+
+        setIsSuccess(false);
+      })
+      .finally(() => {
+
+        setIsLoading(false);
+      });
+
   }, []);
 
-  const handleAddPost = (content) => {
-    axios.post("/twits", { content }).then((res) => {
-      setPosts((prev) => [res.data.twit, ...prev]);
-    });
-  };
+  const handleAddPost = (post) => {
 
-  const handleDelete = (id) => {
-    axios.delete(`/twits/${id}`).then(() => {
-      setPosts((prev) => prev.filter((post) => post.id !== id));
-    });
-  };
+    dispatch(addTwit(post));
+  }
 
-  return (
-    <div className="container mx-auto w-[40vw] py-8">
-      <div className="mb-6">
-        <label className="block font-semibold mb-1">Düşüncelerini yaz</label>
-        <textarea id="newPost" className="w-full border p-2 rounded" maxLength={160} placeholder="160 karakter kaldı" />
-        <button
-          onClick={() => {
-            const content = document.getElementById("newPost").value;
-            if (content.trim()) {
-              handleAddPost(content);
-              document.getElementById("newPost").value = "";
-            }
-          }}
-          className="bg-blue-500 text-white px-4 py-2 rounded mt-2"
-        >
-          Gönder
-        </button>
-      </div>
+  const handleTimelineModeChange = (mode) => {
+    setTimelineMode(mode);
+  }
 
-      <Timeline posts={posts} onDelete={handleDelete} />
-    </div>
-  );
+  return <PageLayout className="">
+    {isLoggedIn && <PostEditor addPost={handleAddPost} />}
+    <TimelineSelector mode={timelineMode} setMode={handleTimelineModeChange} />
+    <Timeline posts={posts} isLoading={isLoading} isSuccess={isSuccess} />
+  </PageLayout>;
 }
